@@ -1,1 +1,54 @@
 @import "tailwindcss";
+
+@font-face {
+  font-family: "Aktura-Regular";
+  src: url("/assets/fonts/Aktura-Regular.otf") format("opentype");
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "LibreBaskerville-VariableFont_wght";
+  src: url("/assets/fonts/LibreBaskerville-VariableFont_wght.ttf")
+    format("opentype");
+  font-weight: normal;
+  font-style: normal;
+}
+
+@theme {
+  --font-Aktura: "Aktura-Regular", serif;
+  --font-Libre: "LibreBaskerville-VariableFont_wght", serif;
+}
+
+.halftone-text {
+  font-family: sans-serif;
+  font-weight: 800;
+  font-size: 96px;
+  line-height: 1;
+  color: #111;
+
+  position: relative;
+  display: inline-block;
+
+  /* makes it feel printed */
+  letter-spacing: -0.02em;
+}
+
+/* dot overlay */
+.halftone-text::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+
+  background-image: radial-gradient(#000 1px, transparent 1px);
+  background-size: 6px 6px;
+
+  opacity: 0.25;
+  mix-blend-mode: multiply;
+  pointer-events: none;
+}
+
+/* subtle ink distortion */
+.halftone-text {
+  filter: contrast(1.1) grayscale(1);
+}
