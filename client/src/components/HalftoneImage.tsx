@@ -3,8 +3,8 @@ import { HalftoneCmyk } from "@paper-design/shaders-react";
 export function HalftoneImage({ src }: { src: string }) {
   return (
     <HalftoneCmyk
-      width={1280}
-      height={720}
+      width="100%"
+      height={250}
       image={src}
       colorBack="#fbfaf4"
       colorC="#00b3ff"
