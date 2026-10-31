@@ -1,0 +1,24 @@
+{
+  "name": "times-of-cyber-fetcher",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Builds the static edition.json for The Times of Cyber from RSS feeds and public APIs.",
+  "scripts": {
+    "fetch": "tsx src/index.ts",
+    "fetch:fixtures": "tsx test/make-fixtures.ts && ABUSECH_AUTH_KEY=fixture tsx src/index.ts --fixtures test/fixtures",
+    "typecheck": "tsc --noEmit",
+    "update:attack": "tsx scripts/update-attack.ts"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "rss-parser": "^3.13.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.20.5",
+    "tsx": "^4.23.15",
+    "typescript": "^5.9.3"
+  }
+}

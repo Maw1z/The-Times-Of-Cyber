@@ -1,0 +1,78 @@
+name: Print edition
+
+# Fetch every feed, build edition.json, build the site, deploy to GitHub Pages.
+# Nothing is committed: the 30-day archive (used for trends and actor activity) is
+# read back from the previously deployed site at the start of each run.
+
+on:
+  schedule:
+    - cron: "17 */3 * * *" # every 3 hours, at :17 past
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: |
+            client/package-lock.json
+            fetcher/package-lock.json
+
+      - id: pages
+        uses: actions/configure-pages@v5
+
+      - name: Install fetcher
+        working-directory: fetcher
+        run: npm ci
+
+      - name: Fetch feeds and compile edition
+        working-directory: fetcher
+        env:
+          ARCHIVE_URL: ${{ steps.pages.outputs.base_url }}/data/archive.json
+          # Provided automatically — used for Sigma rules, detection releases and GitHub advisories.
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Free keys (add as repository secrets; every one is optional):
+          ABUSECH_AUTH_KEY: ${{ secrets.ABUSECH_AUTH_KEY }} # ThreatFox + URLhaus — https://auth.abuse.ch/
+          RANSOMWARE_LIVE_KEY: ${{ secrets.RANSOMWARE_LIVE_KEY }} # https://my.ransomware.live/
+          NVD_API_KEY: ${{ secrets.NVD_API_KEY }} # https://nvd.nist.gov/developers/request-an-api-key
+          REDDIT_CLIENT_ID: ${{ secrets.REDDIT_CLIENT_ID }} # Reddit "script" app; Reddit often blocks anonymous CI
+          REDDIT_CLIENT_SECRET: ${{ secrets.REDDIT_CLIENT_SECRET }}
+        run: npm run fetch
+
+      - name: Build site
+        working-directory: client
+        env:
+          BASE_PATH: ${{ steps.pages.outputs.base_path }}/
+        run: |
+          npm ci
+          npm run build
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: client/dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

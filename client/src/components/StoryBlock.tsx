@@ -1,73 +1,58 @@
-import { Headline, Byline, Body, Photo, Caption, HRule } from "./Primitives";
+import type { Story } from "../types/edition";
+import { ago } from "../lib/format";
+import { Badge, ExtLink } from "./Primitives";
 
-/**
- * story shape:
- * {
- *   headline: string,
- *   deck?: string,
- *   byline: string,
- *   body: string[],
- *   image?: { src, caption, height? },
- *   jumpLine?: string,
- *   size: 'lead' | 'secondary' | 'brief',
- *   dropCap?: boolean,
- *   url?: string,
- * }
- */
-export function StoryBlock({ story, dense = false, showRule = false }) {
-  const { headline, deck, byline, body = [], image, size, dropCap } = story;
-
+export function Byline({ story, now }: { story: Story; now: number }) {
   return (
-    <div style={{ minHeight: 0, overflow: "hidden" }}>
-      <Headline size={size}>{headline}</Headline>
+    <p className="meta m-0 mb-2">
+      {story.author && <span className="italic font-Libre text-[13px] text-[var(--ink-2)]">By {story.author} · </span>}
+      <span className="font-bold uppercase tracking-[0.06em] text-[11px] text-[var(--ink-2)]">{story.source}</span> · {ago(story.published, now)}
+    </p>
+  );
+}
 
-      {deck && (!dense || size === "lead") && (
-        <p
-          style={{
-            fontSize: "7px",
-            fontWeight: "700",
-            textTransform: "uppercase",
-            letterSpacing: "0.05em",
-            marginBottom: "2px",
-            fontFamily: "'Libre Baskerville', serif",
-          }}
-        >
-          {deck}
-        </p>
-      )}
-
-      <Byline>
-        By <strong>{byline}</strong>
-      </Byline>
-
-      {/* Image renders for all sizes — lead gets full width, others get inline */}
-      {image && (
-        <div style={{ marginBottom: "2px" }}>
-          <Photo
-            src={image.src}
-            height={
-              size === "lead"
-                ? dense
-                  ? "90px"
-                  : (image.height ?? "110px")
-                : dense
-                  ? "50px"
-                  : "70px"
-            }
-            className="w-full"
-          />
-          {!dense && image.caption && <Caption>{image.caption}</Caption>}
-        </div>
-      )}
-
-      {/* Body paragraphs — properly mapped */}
-      {body.map((para, i) => (
-        <Body key={i} dropCap={dropCap && !dense && i === 0}>
-          {para}
-        </Body>
+/** CVEs, ATT&CK techniques and actors found in the story, as small tags. */
+export function StoryTags({ story }: { story: Story }) {
+  const cves = story.cves ?? [];
+  const techs = story.techniques ?? [];
+  const actors = story.actors ?? [];
+  if (!cves.length && !techs.length && !actors.length) return null;
+  return (
+    <div className="mt-1.5">
+      {actors.slice(0, 3).map((a) => (
+        <Badge key={a} tone="dark">
+          {a}
+        </Badge>
       ))}
-
-      {showRule && <HRule />}
+      {cves.slice(0, 3).map((c) => (
+        <a key={c} href={`https://nvd.nist.gov/vuln/detail/${c}`} target="_blank" rel="noopener noreferrer">
+          <Badge tone="outline">{c}</Badge>
+        </a>
+      ))}
+      {techs.slice(0, 4).map((t) => (
+        <a key={t} href={`https://attack.mitre.org/techniques/${t.replace(".", "/")}`} target="_blank" rel="noopener noreferrer">
+          <Badge tone="faint">{t}</Badge>
+        </a>
+      ))}
     </div>
+  );
+}
+
+export function AlsoReported({ story }: { story: Story }) {
+  const also = story.alsoReportedBy ?? [];
+  if (!also.length) return null;
+  return (
+    <p className="meta m-0 mt-1.5">
+      Also reported by{" "}
+      {also.slice(0, 4).map((a, i) => (
+        <span key={a.link}>
+          {i > 0 && ", "}
+          <ExtLink href={a.link} className="italic">
+            {a.source}
+          </ExtLink>
+        </span>
+      ))}
+      {also.length > 4 && ` and ${also.length - 4} more`}
+    </p>
   );
 }

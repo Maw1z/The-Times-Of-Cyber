@@ -1,21 +1,394 @@
 @import "tailwindcss";
 
 @font-face {
-  font-family: "Aktura-Regular";
+  font-family: "Aktura";
   src: url("/assets/fonts/Aktura-Regular.otf") format("opentype");
   font-weight: normal;
   font-style: normal;
+  font-display: swap;
 }
 
+/* Variable font: one file covers 400–700. */
 @font-face {
-  font-family: "LibreBaskerville-VariableFont_wght";
-  src: url("/assets/fonts/LibreBaskerville-VariableFont_wght.ttf")
-    format("opentype");
-  font-weight: normal;
+  font-family: "Libre Baskerville";
+  src: url("/assets/fonts/LibreBaskerville-VariableFont_wght.ttf") format("truetype");
+  font-weight: 400 700;
   font-style: normal;
+  font-display: swap;
 }
 
 @theme {
-  --font-Aktura: "Aktura-Regular", serif;
-  --font-Libre: "LibreBaskerville-VariableFont_wght", serif;
+  --font-Aktura: "Aktura", "Libre Baskerville", serif;
+  --font-Libre: "Libre Baskerville", Georgia, serif;
+  --font-label: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --font-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+}
+
+:root {
+  --paper: #f4eddd;
+  --ink: #161412;
+  --ink-2: #3b3732;
+  --ink-3: #6a645b;
+  --rule: #8f897f;
+  --rule-light: #cbc2b2;
+  --desk: #a29c92;
+  --bar: #1b1916;
+  --bar-ink: #efe9dc;
+  --dot: 4px; /* halftone pitch for tints and paper speckle */
+}
+
+html,
+body {
+  background: var(--desk);
+  margin: 0;
+  color: var(--ink);
+}
+
+/* ── Paper ──────────────────────────────────────────────────────────────
+   Halftone done cheaply: the paper carries pin-point dots, shaded areas use
+   larger dots (.tint*), photos go through a true size-varying screen (#ht-photo).
+   Type stays solid black. */
+.paper {
+  position: relative;
+  background-color: var(--paper);
+  background-image:
+    radial-gradient(ellipse at 50% 40%, transparent 55%, rgba(120, 96, 50, 0.1) 100%),
+    radial-gradient(circle, rgba(60, 46, 30, 0.13) 0.55px, transparent 0.9px),
+    radial-gradient(circle, rgba(60, 46, 30, 0.13) 0.55px, transparent 0.9px);
+  background-size:
+    100% 100%,
+    var(--dot) var(--dot),
+    var(--dot) var(--dot);
+  background-position:
+    0 0,
+    0 0,
+    calc(var(--dot) / 2) calc(var(--dot) / 2);
+}
+
+/* Halftone tints: bigger dots = darker shade, like a press screen. */
+.tint,
+.tint-strong,
+.tint-bar {
+  background-image:
+    radial-gradient(circle, var(--tint-ink) var(--tint-r), transparent calc(var(--tint-r) + 0.45px)),
+    radial-gradient(circle, var(--tint-ink) var(--tint-r), transparent calc(var(--tint-r) + 0.45px));
+  background-size: var(--dot) var(--dot);
+  background-position:
+    0 0,
+    calc(var(--dot) / 2) calc(var(--dot) / 2);
+}
+.tint {
+  --tint-ink: rgba(22, 20, 18, 0.5);
+  --tint-r: 0.7px;
+}
+.tint-strong {
+  --tint-ink: rgba(22, 20, 18, 0.7);
+  --tint-r: 1.1px;
+}
+.tint-bar {
+  --tint-ink: rgba(22, 20, 18, 0.88);
+  --tint-r: 1.45px;
+}
+
+/* Letterpress edges on the nameplate and section banners (small elements → cheap). */
+.ink-xl {
+  filter: url(#ink-xl);
+}
+.ink-display {
+  filter: url(#ink-display);
+}
+.ht-photo {
+  filter: grayscale(1) contrast(0.62) brightness(1.16) url(#ht-photo);
+}
+.plain .ink-xl,
+.plain .ink-display {
+  filter: none;
+}
+.plain .ht-photo {
+  filter: grayscale(1) contrast(0.95);
+}
+
+/* ── Type ───────────────────────────────────────────────────────────── */
+.prose-news {
+  font-family: var(--font-Libre);
+  font-size: 15.5px;
+  line-height: 1.62;
+  color: var(--ink);
+  hyphens: auto;
+}
+.prose-news p {
+  margin: 0 0 0.7em;
+}
+.dropcap > p:first-child::first-letter {
+  font-weight: 700;
+  float: left;
+  font-size: 3.3em;
+  line-height: 0.82;
+  margin: 0.06em 0.08em 0 0;
+}
+.kicker {
+  font-family: var(--font-label);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+.meta {
+  font-family: var(--font-label);
+  font-size: 12px;
+  color: var(--ink-3);
+}
+.mono {
+  font-family: var(--font-mono);
+  font-size: 0.86em;
+  letter-spacing: -0.01em;
+}
+.paper a {
+  color: inherit;
+  text-decoration: none;
+}
+.paper a:hover {
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 2px;
+}
+.rule-double {
+  border-top: 3px double var(--ink);
+}
+.columns-news {
+  column-gap: 32px;
+  column-rule: 1px solid var(--rule-light);
+}
+.columns-news > * {
+  break-inside: avoid;
+}
+.clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.clamp-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Tables: header + rows are separate flow items laid on the same grid, so a
+   table can break between pages and repeat its header. */
+.tbl-head,
+.tbl-row {
+  display: grid;
+  column-gap: 10px;
+  font-family: var(--font-Libre);
+  font-size: 13px;
+  line-height: 1.42;
+}
+.tbl-head {
+  font-family: var(--font-label);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-2);
+  padding: 5px 0 4px;
+  border-top: 2px solid var(--ink);
+  border-bottom: 1px solid var(--ink);
+  white-space: nowrap;
+}
+.tbl-row {
+  padding: 6px 0;
+  border-bottom: 1px solid var(--rule-light);
+}
+
+/* ── Flow items & pages ─────────────────────────────────────────────── */
+.fi {
+  display: flow-root;
+}
+.measure {
+  position: absolute;
+  left: -20000px;
+  top: 0;
+  visibility: hidden;
+  pointer-events: none;
+  background: none;
+}
+.dropcap-p::first-letter {
+  font-weight: 700;
+  float: left;
+  font-size: 3.4em;
+  line-height: 0.8;
+  margin: 0.08em 0.08em 0 0;
+}
+.photo-frame {
+  overflow: hidden;
+  will-change: transform; /* keeps the screened photo on its own layer while pages turn */
+}
+
+.book-stage {
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  padding: 10px 0 8px;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+.book-host {
+  position: relative;
+  box-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.2),
+    0 16px 34px -10px rgba(0, 0, 0, 0.45);
+}
+.book-page {
+  overflow: hidden;
+  background: var(--paper);
+}
+.page-inner {
+  position: absolute;
+  left: 0;
+  top: 0;
+  transform-origin: 0 0;
+  overflow: hidden;
+}
+.gutter {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 46px;
+  pointer-events: none;
+  z-index: 1;
+}
+.gutter-left {
+  right: 0;
+  background: linear-gradient(to left, rgba(70, 52, 25, 0.22), rgba(70, 52, 25, 0.06) 35%, transparent);
+}
+.gutter-right {
+  left: 0;
+  background: linear-gradient(to right, rgba(70, 52, 25, 0.24), rgba(70, 52, 25, 0.07) 35%, transparent);
+}
+.gutter-single {
+  display: none;
+}
+.running-head,
+.page-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  font-family: var(--font-label);
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  box-sizing: border-box;
+}
+.running-head > *,
+.page-foot > * {
+  flex: 1 1 0;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.running-head > .order-2,
+.page-foot > .order-2 {
+  flex: 0 0 auto;
+}
+.running-head {
+  border-bottom: 1px solid var(--ink);
+  margin-bottom: 0;
+  padding-bottom: 6px;
+  align-items: flex-end;
+}
+.running-head + div {
+  padding-top: 0;
+}
+.page-foot {
+  border-top: 1px solid var(--rule);
+  font-weight: 400;
+  padding-top: 4px;
+  align-items: flex-start;
+}
+.page-foot strong {
+  font-family: var(--font-Libre);
+  font-size: 12px;
+  color: var(--ink);
+  letter-spacing: 0;
+}
+
+.book-nav {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--font-label);
+  font-size: 12.5px;
+  color: #2c2925;
+  height: 32px;
+}
+.book-nav button {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1px solid rgba(30, 26, 22, 0.35);
+  background: rgba(244, 237, 221, 0.55);
+  color: inherit;
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+}
+.book-zoom {
+  display: inline-flex;
+  gap: 4px;
+  margin-left: 8px;
+  padding-left: 12px;
+  border-left: 1px solid rgba(30, 26, 22, 0.25);
+}
+.book-zoom button {
+  font-family: var(--font-Libre);
+  font-weight: 700;
+}
+.book-nav button:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+.book-nav-label {
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.book-hint {
+  opacity: 0.7;
+}
+
+.scroll-stage {
+  padding: 8px 8px 24px;
+}
+.scroll-sheet {
+  margin: 0 auto;
+  max-width: 100%;
+  box-sizing: border-box;
+  padding-top: 18px;
+  padding-bottom: 22px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25), 0 12px 30px -12px rgba(0, 0, 0, 0.45);
+}
+
+@media print {
+  html,
+  body {
+    background: none;
+  }
+  .no-print {
+    display: none !important;
+  }
+  .scroll-sheet {
+    box-shadow: none;
+  }
 }
